@@ -1,10 +1,11 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const { pool } = require("./database/db");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -33,5 +34,5 @@ app.use("/api/auth", authRoutes);
 app.use("/api/areas", areasRoutes);
 
 app.listen(port, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
+    console.log(`🚀 Servidor corriendo en el puerto ${port}`);
 });
