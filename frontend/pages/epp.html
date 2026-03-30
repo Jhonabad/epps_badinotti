@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipos EPP | Sistema EPPSS</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/table.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+</head>
+
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <span class="material-symbols-outlined">security</span>
+            BADINOTTI
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html"><span class="material-symbols-outlined">dashboard</span> Inicio</a></li>
+            <li><a href="areas.html"><span class="material-symbols-outlined">domain</span> Áreas</a></li>
+            <li><a href="empleados.html"><span class="material-symbols-outlined">group</span> Colaboradores</a></li>
+            <li><a href="epp.html" class="active"><span class="material-symbols-outlined">construction</span> Equipos (EPP)</a></li>
+            <li><a href="entregas.html"><span class="material-symbols-outlined">inventory</span> Entregas</a></li>
+            <li><a href="reportes.html"><span class="material-symbols-outlined">bar_chart</span> Reportes</a></li>
+            <li class="logout-item"><a href="#" id="btnLogout"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <h1 class="page-title">Inventario de EPP</h1>
+        <p class="page-subtitle">Gestiona el inventario de Elementos de Protección Personal disponibles.</p>
+
+        <div class="split-layout">
+            <!-- Formulario -->
+            <aside class="form-panel">
+                <h3 style="margin-bottom: 20px; font-size: 1.2rem; color: white;">Añadir Equipo (EPP)</h3>
+                <form id="formEPP">
+                    <div class="form-group">
+                        <label for="nombre_epp">Nombre del Equipo</label>
+                        <input type="text" id="nombre_epp" placeholder="Ej. Casco de Seguridad" required
+                            autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo">Tipo / Categoría</label>
+                        <select id="tipo" required>
+                            <option value="" disabled selected>Seleccione la categoría</option>
+                            <option value="Cabeza">Protección de Cabeza</option>
+                            <option value="Manos">Protección de Manos</option>
+                            <option value="Pies">Calzado de Seguridad</option>
+                            <option value="Visual">Protección Visual</option>
+                            <option value="Cuerpo">Protección de Cuerpo / Ropa</option>
+                            <option value="Auditiva">Protección Auditiva</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="stock">Stock Disponible</label>
+                        <input type="number" id="stock" min="0" placeholder="Ej. 100" required>
+                    </div>
+                    <button type="submit" class="btn-primary" style="background: #10b981;">
+                        <span class="material-symbols-outlined">add_box</span>
+                        Guardar Equipo
+                    </button>
+                    <p id="form-msg"
+                        style="margin-top: 10px; font-size: 0.85rem; text-align: center; color: var(--success); display: none;">
+                    </p>
+                </form>
+            </aside>
+
+            <!-- Tabla -->
+            <section class="table-container">
+                <table id="tablaEPP">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Equipo</th>
+                            <th>Categoría</th>
+                            <th>Stock</th>
+                            <th style="text-align: right;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Renderizado via JS -->
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="../js/epp.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colaboradores | Sistema EPP</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/table.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+</head>
+
+<body>
+
+    <!-- Sidebar Navegación -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <span class="material-symbols-outlined">security</span>
+            BADINOTTI
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html"><span class="material-symbols-outlined">dashboard</span> Inicio</a></li>
+            <li><a href="areas.html"><span class="material-symbols-outlined">domain</span> Áreas</a></li>
+            <li><a href="empleados.html" class="active"><span class="material-symbols-outlined">group</span> Colaboradores</a></li>
+            <li><a href="epp.html"><span class="material-symbols-outlined">construction</span> Equipos (EPP)</a></li>
+            <li><a href="entregas.html"><span class="material-symbols-outlined">inventory</span> Entregas</a></li>
+            <li><a href="reportes.html"><span class="material-symbols-outlined">bar_chart</span> Reportes</a></li>
+            <li class="logout-item"><a href="#" id="btnLogout"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</a></li>
+        </ul>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <h1 class="page-title">Gestión de Colaboradores</h1>
+        <p class="page-subtitle">Administra los colaboradores de la organización.</p>
+
+        <div class="split-layout">
+            <!-- Formulario -->
+            <aside class="form-panel">
+                <h3 style="margin-bottom: 20px; font-size: 1.2rem; color: white;">Nuevo Colaborador</h3>
+                <form id="formColaborador">
+                    <div class="form-group">
+                        <label for="nombre">Nombre Completo</label>
+                        <input type="text" id="nombre" placeholder="Ej. Juan Pérez" required autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="area">Área / Departamento</label>
+                        <select id="area" required>
+                            <option value="" disabled selected>Cargando áreas...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cargo">Cargo</label>
+                        <input type="text" id="cargo" placeholder="Ej. Operario de Máquina" required autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-outlined">save</span>
+                        Guardar Colaborador
+                    </button>
+                    <p id="form-msg"
+                        style="margin-top: 10px; font-size: 0.85rem; text-align: center; color: var(--success); display: none;">
+                    </p>
+                </form>
+            </aside>
+
+            <!-- Tabla -->
+            <section class="table-container">
+                <table id="tablaColaboradores">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Área</th>
+                            <th>Cargo</th>
+                            <th style="text-align: right;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Renderizado via JS -->
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="../js/empleados.js"></script>
+</body>
+
+</html>

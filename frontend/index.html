@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Sistema EPP</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+</head>
+
+<body>
+
+    <!-- Sidebar Navegación -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <span class="material-symbols-outlined">security</span>
+            BADINOTTI
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active"><span class="material-symbols-outlined">dashboard</span> Inicio</a></li>
+            <li><a href="pages/areas.html"><span class="material-symbols-outlined">domain</span> Áreas</a></li>
+            <li><a href="pages/empleados.html"><span class="material-symbols-outlined">group</span> Colaboradores</a></li>
+            <li><a href="pages/epp.html"><span class="material-symbols-outlined">construction</span> Equipos (EPP)</a></li>
+            <li><a href="pages/entregas.html"><span class="material-symbols-outlined">inventory</span> Entregas</a></li>
+            <li><a href="pages/reportes.html"><span class="material-symbols-outlined">bar_chart</span> Reportes</a></li>
+            <li class="logout-item"><a href="#" id="btnLogout"><span class="material-symbols-outlined">logout</span> Cerrar Sesión</a></li>
+        </ul>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <h1 class="page-title">Dashboard General</h1>
+        <p class="page-subtitle">Sistema de Control de Equipos de Protección Colaboradores de Badinotti.</p>
+
+        <div class="dashboard-grid">
+            <a href="pages/empleados.html" class="glass-card">
+                <span class="material-symbols-outlined"
+                    style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;">group</span>
+                <h3>Gestión de Colaboradores</h3>
+                <p>Registra, edita o elimina personal en el sistema.</p>
+            </a>
+
+            <a href="pages/epp.html" class="glass-card">
+                <span class="material-symbols-outlined"
+                    style="font-size: 2.5rem; color: #10b981; margin-bottom: 10px;">construction</span>
+                <h3 style="color: #10b981;">Inventario EPP</h3>
+                <p>Administra los equipos disponibles y controla su stock.</p>
+            </a>
+
+            <a href="pages/entregas.html" class="glass-card">
+                <span class="material-symbols-outlined"
+                    style="font-size: 2.5rem; color: #8b5cf6; margin-bottom: 10px;">inventory</span>
+                <h3 style="color: #8b5cf6;">Entregas y Asignaciones</h3>
+                <p>Asigna equipos de protección de forma rápida y segura.</p>
+            </a>
+
+            <a href="pages/areas.html" class="glass-card">
+                <span class="material-symbols-outlined"
+                    style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 10px;">domain</span>
+                <h3 style="color: #f59e0b;">Configuración de Áreas</h3>
+                <p>Gestiona los diferentes departamentos y sus requerimientos.</p>
+            </a>
+
+            <a href="pages/reportes.html" class="glass-card">
+                <span class="material-symbols-outlined"
+                    style="font-size: 2.5rem; color: #ec4899; margin-bottom: 10px;">bar_chart</span>
+                <h3 style="color: #ec4899;">Reportes y Estadísticas</h3>
+                <p>Visualiza gráficamente el nivel de cumplimiento y entregas.</p>
+            </a>
+        </div>
+    </main>
+
+</body>
+
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes | Sistema EPP</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/forms.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../css/reportes.css">
+</head>
+
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <span class="material-symbols-outlined">security</span>
+            BADINOTTI
+        </div>
+        <ul class="nav-links">
+            <li><a href="../index.html"><span class="material-symbols-outlined">dashboard</span> Inicio</a></li>
+            <li><a href="areas.html"><span class="material-symbols-outlined">domain</span> Áreas</a></li>
+            <li><a href="empleados.html"><span class="material-symbols-outlined">group</span> Colaboradores</a></li>
+            <li><a href="epp.html"><span class="material-symbols-outlined">construction</span> Equipos (EPP)</a></li>
+            <li><a href="entregas.html"><span class="material-symbols-outlined">inventory</span> Entregas</a></li>
+            <li><a href="reportes.html" class="active"><span class="material-symbols-outlined">bar_chart</span>
+                    Reportes</a></li>
+            <li class="logout-item"><a href="#" id="btnLogout"><span class="material-symbols-outlined">logout</span>
+                    Cerrar Sesión</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <h1 class="page-title">Reportes y Estadísticas</h1>
+        <p class="page-subtitle">Progreso de entregas de EPPs.</p>
+
+        <div class="report-panel">
+            <div class="report-type-selector">
+                <label>
+                    <input type="radio" name="reportType" value="general" checked> General (Todas las Áreas)
+                </label>
+                <label>
+                    <input type="radio" name="reportType" value="especifico"> Específico (Por Área / Colaborador)
+                </label>
+            </div>
+
+            <div class="controls">
+                <div class="form-group" id="groupEspecifico" style="display: none; gap: 15px; flex-direction: row; align-items: flex-end;">
+                    <div>
+                        <label for="selectArea">1. Selecciona un Área</label>
+                        <select id="selectArea">
+                            <option value="" disabled selected>Cargando áreas...</option>
+                        </select>
+                    </div>
+                
+                    <div>
+                        <label for="selectColaborador">2. Selecciona un Colaborador</label>
+                        <select id="selectColaborador" disabled>
+                            <option value="" disabled selected>Seleccione área primero...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="flex-grow: 1; display: flex; justify-content: flex-end;">
+                    <button type="button" class="btn-download" id="btnDownload" disabled>
+                        <span class="material-symbols-outlined">download</span> Descargar Gráfico
+                    </button>
+                </div>
+            </div>
+
+            <div class="report-content" style="display: flex; gap: 20px; align-items: flex-start; margin-top: 20px;">
+                <div style="flex-grow: 1; position: relative; height:400px; min-width: 0;">
+                    <canvas id="eppChart"></canvas>
+                </div>
+                
+                <aside id="colaboradorInfoPanel" style="display: none; width: 300px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 20px; flex-shrink: 0;">
+                    <h3 id="panelColNombre" style="color: white; margin-bottom: 5px; font-size: 1.1rem;">Nombre</h3>
+                    <p id="panelColCargo" style="color: #a1a1aa; margin-bottom: 15px; font-size: 0.9rem;">Cargo - Área</p>
+                    
+                    <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
+                        <span style="display: block; font-size: 0.8rem; color: #a1a1aa; text-transform: uppercase; margin-bottom: 4px;">Progreso</span>
+                        <strong id="panelColProgressText" style="color: white; font-size: 1.2rem;">3 de 5 Entregados</strong>
+                    </div>
+                    
+                    <h4 style="color: #e4e4e7; margin-bottom: 12px; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Estado de Equipos:</h4>
+                    <div id="panelColEpps" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                        <!-- Inject boxes via JS -->
+                    </div>
+                </aside>
+            </div>
+            
+            <p id="no-data-msg" style="text-align: center; color: #a1a1aa; margin-top: 20px; display: none;">No hay EPPs
+                requeridos asignados a esta área.</p>
+        </div>
+    </main>
+
+    <script type="module" src="../js/reportes.js"></script>
+</body>
+
+</html>
