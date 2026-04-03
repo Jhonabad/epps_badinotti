@@ -18,6 +18,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pProgress = document.getElementById("panelColProgressText");
     const pEpps = document.getElementById("panelColEpps");
 
+    // UI Table Elements
+    const dynamicTableContainer = document.getElementById("dynamicTableContainer");
+    const tableAreaName = document.getElementById("tableAreaName");
+    const monthlyEppTableHead = document.getElementById("monthlyEppTableHead");
+    const monthlyEppTableBody = document.getElementById("monthlyEppTableBody");
+    const monthlyNoDataMsg = document.getElementById("monthlyNoDataMsg");
+    const monthlyEppTable = document.getElementById("monthlyEppTable");
+
     let chartInstance = null;
     let listaAreas = [];
     let listaColaboradores = [];
@@ -50,6 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const type = e.target.value;
 
             hidePanel();
+            if (dynamicTableContainer) dynamicTableContainer.style.display = "none";
 
             if (type === "general") {
                 groupEspecifico.style.display = "none";
@@ -218,6 +227,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }]
             },
             options: {
+                onClick: (e, elements) => {
+                    if (elements && elements.length > 0 && xAxisTitle === "Áreas") {
+                        const index = elements[0].index;
+                        const clickedLabel = labels[index];
+                        const areaObj = listaAreas.find(a => a.nombre_area === clickedLabel);
+                        if (areaObj) {
+                            loadMonthlyTable(areaObj.id_area);
+                        }
+                    }
+                },
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
@@ -275,4 +294,72 @@ document.addEventListener("DOMContentLoaded", async () => {
         link.href = document.getElementById("eppChart").toDataURL('image/png');
         link.click();
     });
+
+    async function loadMonthlyTable(areaId) {
+        try {
+            const data = await fetchAPI(`/areas/${areaId}/entregas-mensuales`);
+            tableAreaName.textContent = `Entregas Mensuales - Área: ${data.nombre_area}`;
+            
+            monthlyEppTableHead.innerHTML = '';
+            monthlyEppTableBody.innerHTML = '';
+            
+            if (!data.periodos || data.periodos.length === 0) {
+                monthlyNoDataMsg.style.display = 'block';
+                monthlyEppTable.style.display = 'none';
+            } else {
+                monthlyNoDataMsg.style.display = 'none';
+                monthlyEppTable.style.display = 'table';
+                
+                // Header (first col empty or 'Mes', rest epps)
+                const thMes = document.createElement('th');
+                thMes.textContent = 'Período';
+                thMes.style.padding = '12px';
+                thMes.style.borderBottom = '2px solid rgba(139, 92, 246, 0.5)';
+                monthlyEppTableHead.appendChild(thMes);
+                
+                data.epps.forEach(epp => {
+                    const th = document.createElement('th');
+                    th.textContent = epp.nombre_epp;
+                    th.style.padding = '12px';
+                    th.style.borderBottom = '2px solid rgba(139, 92, 246, 0.5)';
+                    monthlyEppTableHead.appendChild(th);
+                });
+                
+                // Body rows
+                data.periodos.forEach(periodo => {
+                    const tr = document.createElement('tr');
+                    
+                    const tdMes = document.createElement('td');
+                    tdMes.textContent = periodo;
+                    tdMes.style.padding = '12px';
+                    tdMes.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+                    tdMes.style.fontWeight = 'bold';
+                    tr.appendChild(tdMes);
+                    
+                    data.epps.forEach(epp => {
+                        const td = document.createElement('td');
+                        const cantidad = data.matrix[periodo][epp.id_epp] || 0;
+                        td.textContent = cantidad;
+                        td.style.padding = '12px';
+                        td.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+                        if (cantidad > 0) {
+                            td.style.color = '#34d399';
+                        }
+                        tr.appendChild(td);
+                    });
+                    
+                    monthlyEppTableBody.appendChild(tr);
+                });
+            }
+            
+            dynamicTableContainer.style.display = 'block';
+            
+            setTimeout(() => {
+                dynamicTableContainer.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+            
+        } catch (error) {
+            console.error("Error al cargar tabla mensual:", error);
+        }
+    }
 });

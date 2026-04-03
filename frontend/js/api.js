@@ -1,20 +1,19 @@
 export const API_URL = "http://localhost:3000/api";
 
-// Verificación de sesión
 export function checkAuth() {
     // Evitar loop infinito si ya estamos en el login
     const isLoginPage = window.location.pathname.includes('login.html');
     const session = localStorage.getItem("userSession");
 
     if (!session && !isLoginPage) {
-        window.location.replace("/WEB_EPPS/frontend/login.html");
+        window.location.replace("/login.html");
     }
 }
 
 // Cerrar sesión
 export function logout() {
     localStorage.removeItem("userSession");
-    window.location.replace("/WEB_EPPS/frontend/login.html");
+    window.location.replace("/login.html");
 }
 
 // Vincular automáticamente el botón de cerrar sesión

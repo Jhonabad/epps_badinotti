@@ -95,6 +95,23 @@
             
             <p id="no-data-msg" style="text-align: center; color: #a1a1aa; margin-top: 20px; display: none;">No hay EPPs
                 requeridos asignados a esta área.</p>
+
+            <div id="dynamicTableContainer" style="display: none; margin-top: 40px; background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <h3 id="tableAreaName" style="color: white; margin-bottom: 20px; text-align: center; font-size: 1.2rem;">Entregas Mensuales</h3>
+                <div style="overflow-x: auto;">
+                    <table id="monthlyEppTable" style="width: 100%; border-collapse: collapse; color: #e4e4e7; text-align: left;">
+                        <thead>
+                            <tr id="monthlyEppTableHead">
+                                <!-- Columns dynamically generated -->
+                            </tr>
+                        </thead>
+                        <tbody id="monthlyEppTableBody">
+                            <!-- Rows dynamically generated -->
+                        </tbody>
+                    </table>
+                </div>
+                <p id="monthlyNoDataMsg" style="text-align: center; color: #a1a1aa; margin-top: 20px; display: none;">No hay entregas registradas mensualmente en esta área.</p>
+            </div>
         </div>
     </main>
 

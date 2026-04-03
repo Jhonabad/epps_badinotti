@@ -1,5 +1,6 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const multer = require("multer");
 const { pool } = require("./database/db");
@@ -9,6 +10,14 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Servir archivos estáticos del frontend
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/login.html"));
+});
 
 const upload = multer({ dest: "uploads/" });
 

@@ -294,4 +294,83 @@ router.get("/:id/stats", async (req, res) => {
     }
 });
 
+// Obtener estadísticas mensuales de entregas (Tabla Dinámica) para un área
+router.get("/:id/entregas-mensuales", async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const areas = await getAreasConEPPs();
+        const area = areas.find(a => a.id_area === id);
+
+        if (!area) {
+            return res.status(404).json({ error: "Área no encontrada" });
+        }
+
+        const eppDb = await connectToDatabase("SELECT id_epp, nombre_epp FROM epp");
+        const eppsArea = area.epps_asignados.map(eppId => {
+            const e = eppDb.find(item => item.id_epp === parseInt(eppId));
+            return e ? { id_epp: eppId, nombre_epp: e.nombre_epp } : null;
+        }).filter(e => e !== null);
+
+        const empleados = await connectToDatabase("SELECT id_colaborador FROM colaboradores WHERE area = ?", [area.nombre_area]);
+        const idsColaboradores = empleados.map(c => c.id_colaborador);
+
+        if (idsColaboradores.length === 0) {
+            return res.json({ epps: eppsArea, periodos: [], matrix: {} });
+        }
+
+        const placeholders = idsColaboradores.map(() => '?').join(',');
+        const entregasDb = await connectToDatabase(`SELECT id_epp, cantidad, fecha FROM entregas WHERE id_colaborador IN (${placeholders})`, idsColaboradores);
+
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+        const matrix = {}; 
+        const sortablePeriods = []; 
+
+        entregasDb.forEach(entrega => {
+            if (!area.epps_asignados.includes(entrega.id_epp)) return;
+
+            const fecha = new Date(entrega.fecha);
+            if (isNaN(fecha.getTime())) return;
+
+            const year = fecha.getFullYear();
+            const monthIndex = fecha.getMonth(); 
+            const formatKey = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}`;
+            const labelKey = `${monthNames[monthIndex]} ${year}`;
+
+            if (!matrix[labelKey]) {
+                matrix[labelKey] = {};
+                sortablePeriods.push({ sortKey: formatKey, label: labelKey });
+            }
+
+            if (!matrix[labelKey][entrega.id_epp]) {
+                matrix[labelKey][entrega.id_epp] = 0;
+            }
+            matrix[labelKey][entrega.id_epp] += entrega.cantidad;
+        });
+
+        const uniqueSortable = [];
+        const seen = new Set();
+        sortablePeriods.forEach(p => {
+            if (!seen.has(p.sortKey)) {
+                seen.add(p.sortKey);
+                uniqueSortable.push(p);
+            }
+        });
+        uniqueSortable.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+
+        const periodosOrdenados = uniqueSortable.map(p => p.label);
+
+        res.json({
+            nombre_area: area.nombre_area,
+            epps: eppsArea,
+            periodos: periodosOrdenados,
+            matrix
+        });
+
+    } catch (error) {
+        console.error("Error al generar matriz mensual:", error);
+        res.status(500).json({ error: "Error al generar matriz mensual" });
+    }
+});
+
 module.exports = router;

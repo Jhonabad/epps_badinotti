@@ -1,6 +1,4 @@
 const mysql = require("mysql2/promise");
-const fs = require("fs");
-const path = require("path");
 
 const dbConfig = {
     host: process.env.DB_HOST || "127.0.0.1",
@@ -12,15 +10,6 @@ const dbConfig = {
     connectionLimit: 10,
     queueLimit: 0
 };
-
-// Si existe el certificado SSL (necesario para bases de datos como Aiven), se habilita SSL
-const sslCertPath = path.join(__dirname, "ca.pem");
-if (fs.existsSync(sslCertPath)) {
-    dbConfig.ssl = {
-        ca: fs.readFileSync(sslCertPath)
-    };
-    console.log("🔒 Certificado SSL (ca.pem) detectado, conexiones cifradas activas.");
-}
 
 const pool = mysql.createPool(dbConfig);
 
@@ -35,4 +24,4 @@ async function connectToDatabase(query, params = []) {
     }
 }
 
-module.exports = { connectToDatabase, pool };
+module.exports = { connectToDatabase, pool };
