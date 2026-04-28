@@ -26,6 +26,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const monthlyNoDataMsg = document.getElementById("monthlyNoDataMsg");
     const monthlyEppTable = document.getElementById("monthlyEppTable");
 
+    const colaboradoresListaContainer = document.getElementById("colaboradoresListaContainer");
+    const colaboradoresListaHead = document.getElementById("colaboradoresListaHead");
+    const colaboradoresListaBody = document.getElementById("colaboradoresListaBody");
+
+    const colaboradorMatrixPanel = document.getElementById("colaboradorMatrixPanel");
+    const matrixColaboradorNombre = document.getElementById("matrixColaboradorNombre");
+    const matrixColaboradorArea = document.getElementById("matrixColaboradorArea");
+    const matrixColaboradorCargo = document.getElementById("matrixColaboradorCargo");
+    const matrixColaboradorHead = document.getElementById("matrixColaboradorHead");
+    const matrixColaboradorBody = document.getElementById("matrixColaboradorBody");
+    const matrixColaboradorFoot = document.getElementById("matrixColaboradorFoot");
+
     let chartInstance = null;
     let listaAreas = [];
     let listaColaboradores = [];
@@ -59,6 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             hidePanel();
             if (dynamicTableContainer) dynamicTableContainer.style.display = "none";
+            if (colaboradoresListaContainer) colaboradoresListaContainer.style.display = "none";
 
             if (type === "general") {
                 groupEspecifico.style.display = "none";
@@ -106,12 +119,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             hidePanel();
             if (selectArea.value) loadAreaReport(selectArea.value);
         } else {
+            if (colaboradoresListaContainer) colaboradoresListaContainer.style.display = "none";
             loadColaboradorReport(colId);
         }
     });
 
     function hidePanel() {
         if(colPanel) colPanel.style.display = "none";
+        if(colaboradoresListaContainer) colaboradoresListaContainer.style.display = "none";
+        if(colaboradorMatrixPanel) colaboradorMatrixPanel.style.display = "none";
+        const eppChartContainer = document.getElementById("eppChart").parentElement;
+        if(eppChartContainer) eppChartContainer.style.display = "block";
     }
 
     async function loadGeneralReport() {
@@ -127,6 +145,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             const data = await fetchAPI(`/areas/${areaId}/stats`);
             renderChart(data.stats, "nombre_epp", "Equipos (EPP)");
+            
+            if (data.colaboradoresLista && data.colaboradoresLista.length > 0) {
+                if(colaboradoresListaHead) {
+                    let thHtml = `<th style="padding: 12px; border-bottom: 2px solid rgba(139, 92, 246, 0.5);">Colaborador</th>`;
+                    data.stats.forEach(s => {
+                        thHtml += `<th style="padding: 12px; border-bottom: 2px solid rgba(139, 92, 246, 0.5); text-align: center; font-size:0.85rem;">${s.nombre_epp}</th>`;
+                    });
+                    colaboradoresListaHead.innerHTML = `<tr>${thHtml}</tr>`;
+                }
+
+                if(colaboradoresListaBody) colaboradoresListaBody.innerHTML = '';
+                data.colaboradoresLista.forEach(c => {
+                    const tr = document.createElement("tr");
+                    let tdHtml = `<td style="padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-weight: bold;">${c.nombre_colaborador}</td>`;
+                    
+                    data.stats.forEach(s => {
+                        const cant = c.epps[s.id_epp] || 0;
+                        tdHtml += `<td style="padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); text-align: center; color: ${cant > 0 ? '#34d399' : '#636369'}; font-weight: ${cant > 0 ? 'bold' : 'normal'};">${cant}</td>`;
+                    });
+
+                    tr.innerHTML = tdHtml;
+                    if(colaboradoresListaBody) colaboradoresListaBody.appendChild(tr);
+                });
+                if(colaboradoresListaContainer) colaboradoresListaContainer.style.display = 'block';
+            } else {
+                if(colaboradoresListaContainer) colaboradoresListaContainer.style.display = 'none';
+            }
+
         } catch (err) {
             console.error(err);
         }
@@ -135,8 +181,70 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function loadColaboradorReport(colId) {
         try {
             const data = await fetchAPI(`/areas/stats/colaborador/${colId}`);
-            renderChart(data.stats, "nombre_epp", "Equipos (EPP)");
-            renderColaboradorPanel(data.nombre_colaborador, colId, data.stats);
+            
+            const eppChartContainer = document.getElementById("eppChart").parentElement;
+            if(eppChartContainer) eppChartContainer.style.display = "none"; 
+            if(colPanel) colPanel.style.display = "none";
+            if(colaboradoresListaContainer) colaboradoresListaContainer.style.display = "none";
+
+            matrixColaboradorNombre.textContent = data.nombre_colaborador;
+            matrixColaboradorArea.textContent = data.nombre_area;
+            matrixColaboradorCargo.textContent = data.cargo;
+            
+            matrixColaboradorHead.innerHTML = "";
+            matrixColaboradorBody.innerHTML = "";
+            matrixColaboradorFoot.innerHTML = "";
+
+            if (data.stats && data.stats.length > 0) {
+                let trH1 = `<tr><th rowspan="2" style="border: 1px solid rgba(139, 92, 246, 0.5); padding: 5px;">Fechas</th>`;
+                let trH2 = `<tr>`;
+                
+                data.stats.forEach(s => {
+                    trH1 += `<th colspan="2" style="border: 1px solid rgba(139, 92, 246, 0.5); padding: 5px; font-size:0.85rem; background:rgba(255,255,255,0.05); text-transform:uppercase;">${s.nombre_epp}</th>`;
+                    trH2 += `<th style="border: 1px solid rgba(139, 92, 246, 0.5); padding: 5px; font-weight:normal; font-size:0.75rem;">Entrega</th>
+                             <th style="border: 1px solid rgba(139, 92, 246, 0.5); padding: 5px; font-weight:normal; font-size:0.75rem;">Devolución</th>`;
+                });
+                trH1 += `</tr>`;
+                trH2 += `</tr>`;
+                matrixColaboradorHead.innerHTML = trH1 + trH2;
+
+                if (data.eventosLista) {
+                    data.eventosLista.forEach(ev => {
+                        let tr = `<tr>`;
+                        tr += `<td style="border: 1px solid #3f3f46; padding: 5px; font-size:0.8rem; font-weight:bold;">${ev.fecha_evento}</td>`;
+                        data.stats.forEach(s => {
+                            const cell = ev.epps[s.id_epp];
+                            if (cell) {
+                                tr += `<td style="border: 1px solid #3f3f46; padding: 5px; color:#34d399; font-size:0.85rem;">[${cell.cantidad}] Entregado</td>`;
+                                
+                                let devHtml = "";
+                                if (cell.estado_devolucion) {
+                                    let devColor = cell.estado_devolucion === 'Reutilizable' ? '#3b82f6' : '#f59e0b';
+                                    devHtml = `<span style="color:${devColor}; font-size:0.8rem;">${cell.estado_devolucion}</span>`;
+                                } else {
+                                    devHtml = `<button onclick="window.devolverEPP(${cell.id_entrega})" style="padding:4px 8px; font-size:0.75rem; background:#3f3f46; color:white; border:none; border-radius:4px; cursor:pointer;">Registrar</button>`;
+                                }
+                                tr += `<td style="border: 1px solid #3f3f46; padding: 5px; text-align:center;">${devHtml}</td>`;
+                            } else {
+                                tr += `<td style="border: 1px solid #3f3f46; padding: 5px;"></td>`;
+                                tr += `<td style="border: 1px solid #3f3f46; padding: 5px;"></td>`;
+                            }
+                        });
+                        tr += `</tr>`;
+                        matrixColaboradorBody.innerHTML += tr;
+                    });
+                }
+
+                let trF = `<tr><th style="border: 1px solid rgba(139, 92, 246, 0.5); padding: 5px; background:rgba(255,255,255,0.05); text-align:right;">Totales</th>`;
+                data.stats.forEach(s => {
+                    trF += `<th colspan="2" style="border: 1px solid rgba(139, 92, 246, 0.5); padding: 5px; background:rgba(255,255,255,0.05); color:#10b981; font-size:1rem;">${s.entregados}</th>`;
+                });
+                trF += `</tr>`;
+                matrixColaboradorFoot.innerHTML = trF;
+            }
+
+            colaboradorMatrixPanel.style.display = "block";
+
         } catch (err) {
             console.error(err);
             clearChart();
@@ -145,6 +253,24 @@ document.addEventListener("DOMContentLoaded", async () => {
             noDataMsg.style.display = "block";
         }
     }
+
+    window.devolverEPP = async (idEntrega) => {
+        const estado = prompt("Ingrese tipo de devolución:\n1 para Reutilizable\n2 para Desechable");
+        if(estado === '1' || estado === '2' || (estado && (estado.toLowerCase() === 'reutilizable' || estado.toLowerCase() === 'desechable'))) {
+            const estadoFormateado = (estado === '1' || estado.toLowerCase() === 'reutilizable') ? 'Reutilizable' : 'Desechable';
+            try {
+                await fetchAPI(`/entregas/devolver/${idEntrega}`, "POST", { estado_devolucion: estadoFormateado });
+                alert("Devolución registrada exitosamente.");
+                if (document.getElementById("selectColaborador").value) {
+                    loadColaboradorReport(document.getElementById("selectColaborador").value);
+                }
+            } catch(e) {
+                alert("Error al registrar devolución.");
+            }
+        } else {
+            if(estado) alert("Estado no válido. Operación cancelada.");
+        }
+    };
 
     function renderColaboradorPanel(nombre, idStr, statsArray) {
         if(!colPanel) return;
@@ -310,35 +436,35 @@ document.addEventListener("DOMContentLoaded", async () => {
                 monthlyNoDataMsg.style.display = 'none';
                 monthlyEppTable.style.display = 'table';
                 
-                // Header (first col empty or 'Mes', rest epps)
-                const thMes = document.createElement('th');
-                thMes.textContent = 'Período';
-                thMes.style.padding = '12px';
-                thMes.style.borderBottom = '2px solid rgba(139, 92, 246, 0.5)';
-                monthlyEppTableHead.appendChild(thMes);
+                // Header 
+                const thEpp = document.createElement('th');
+                thEpp.textContent = 'Equipo (EPP)';
+                thEpp.style.padding = '12px';
+                thEpp.style.borderBottom = '2px solid rgba(139, 92, 246, 0.5)';
+                monthlyEppTableHead.appendChild(thEpp);
                 
-                data.epps.forEach(epp => {
+                data.periodos.forEach(periodo => {
                     const th = document.createElement('th');
-                    th.textContent = epp.nombre_epp;
+                    th.textContent = periodo;
                     th.style.padding = '12px';
                     th.style.borderBottom = '2px solid rgba(139, 92, 246, 0.5)';
                     monthlyEppTableHead.appendChild(th);
                 });
                 
                 // Body rows
-                data.periodos.forEach(periodo => {
+                data.epps.forEach(epp => {
                     const tr = document.createElement('tr');
                     
-                    const tdMes = document.createElement('td');
-                    tdMes.textContent = periodo;
-                    tdMes.style.padding = '12px';
-                    tdMes.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
-                    tdMes.style.fontWeight = 'bold';
-                    tr.appendChild(tdMes);
+                    const tdEpp = document.createElement('td');
+                    tdEpp.textContent = epp.nombre_epp;
+                    tdEpp.style.padding = '12px';
+                    tdEpp.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+                    tdEpp.style.fontWeight = 'bold';
+                    tr.appendChild(tdEpp);
                     
-                    data.epps.forEach(epp => {
+                    data.periodos.forEach(periodo => {
                         const td = document.createElement('td');
-                        const cantidad = data.matrix[periodo][epp.id_epp] || 0;
+                        const cantidad = data.matrix[periodo] && data.matrix[periodo][epp.id_epp] ? data.matrix[periodo][epp.id_epp] : 0;
                         td.textContent = cantidad;
                         td.style.padding = '12px';
                         td.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
@@ -360,6 +486,141 @@ document.addEventListener("DOMContentLoaded", async () => {
             
         } catch (error) {
             console.error("Error al cargar tabla mensual:", error);
+        }
+    }
+
+    // === Global Report Modal Logic ===
+    const btnOpenGlobalModal = document.getElementById("btnOpenGlobalModal");
+    const globalReportModal = document.getElementById("globalReportModal");
+    const btnCloseGlobalModal = document.getElementById("btnCloseGlobalModal");
+    const globalYearSelect = document.getElementById("globalYearSelect");
+    const globalReportTableHead = document.getElementById("globalReportTableHead");
+    const globalReportTableBody = document.getElementById("globalReportTableBody");
+    const globalReportTotal = document.getElementById("globalReportTotal");
+    const globalYearLabel = document.getElementById("globalYearLabel");
+
+    if (btnOpenGlobalModal) {
+        const currentYear = new Date().getFullYear();
+        globalYearSelect.innerHTML = `
+            <option value="${currentYear}">${currentYear}</option>
+            <option value="${currentYear - 1}">${currentYear - 1}</option>
+            <option value="${currentYear - 2}">${currentYear - 2}</option>
+        `;
+
+        btnOpenGlobalModal.addEventListener("click", () => {
+            globalReportModal.style.display = "flex";
+            loadGlobalReport(globalYearSelect.value);
+        });
+
+        btnCloseGlobalModal.addEventListener("click", () => {
+            globalReportModal.style.display = "none";
+        });
+
+        globalYearSelect.addEventListener("change", (e) => {
+            loadGlobalReport(e.target.value);
+        });
+    }
+
+    async function loadGlobalReport(year) {
+        globalYearLabel.textContent = `(${year})`;
+        try {
+            const data = await fetchAPI(`/entregas/reporte-global/${year}`);
+            globalReportTableHead.innerHTML = "";
+            globalReportTableBody.innerHTML = "";
+
+            // Thead
+            const thEq = document.createElement("th");
+            thEq.style.padding = "10px";
+            thEq.style.borderBottom = "2px solid #3f3f46";
+            thEq.textContent = "EQUIPO (EPP)";
+            globalReportTableHead.appendChild(thEq);
+
+            data.periodos.forEach(m => {
+                const th = document.createElement("th");
+                th.style.padding = "10px";
+                th.style.borderBottom = "2px solid #3f3f46";
+                th.style.textAlign = "center";
+                th.textContent = m.substring(0,3).toUpperCase();
+                globalReportTableHead.appendChild(th);
+            });
+
+            const thTotalAnual = document.createElement("th");
+            thTotalAnual.style.padding = "10px";
+            thTotalAnual.style.borderBottom = "2px solid #10b981";
+            thTotalAnual.style.textAlign = "center";
+            thTotalAnual.textContent = "TOTAL AÑO";
+            globalReportTableHead.appendChild(thTotalAnual);
+
+            const thCostoUn = document.createElement("th");
+            thCostoUn.style.padding = "10px";
+            thCostoUn.style.borderBottom = "2px solid #3f3f46";
+            thCostoUn.style.textAlign = "right";
+            thCostoUn.textContent = "COSTO UND";
+            globalReportTableHead.appendChild(thCostoUn);
+
+            const thCostoTot = document.createElement("th");
+            thCostoTot.style.padding = "10px";
+            thCostoTot.style.borderBottom = "2px solid #10b981";
+            thCostoTot.style.textAlign = "right";
+            thCostoTot.textContent = "COSTO TOTAL";
+            globalReportTableHead.appendChild(thCostoTot);
+
+            // Tbody
+            data.epps.forEach(epp => {
+                const tr = document.createElement("tr");
+
+                const tdName = document.createElement("td");
+                tdName.style.padding = "10px";
+                tdName.style.borderBottom = "1px solid #27272a";
+                tdName.innerHTML = `<strong>${epp.nombre_epp}</strong> <br> <small style="color:#a1a1aa">Expira en: ${epp.vida_util_dias || 180} días</small>`;
+                tr.appendChild(tdName);
+
+                data.periodos.forEach(m => {
+                    const cant = data.matrix[m][epp.id_epp] || 0;
+                    const td = document.createElement("td");
+                    td.style.padding = "10px";
+                    td.style.borderBottom = "1px solid #27272a";
+                    td.style.textAlign = "center";
+                    td.textContent = cant;
+                    if(cant > 0) td.style.color = "#34d399";
+                    tr.appendChild(td);
+                });
+
+                const totalE = data.totales_anuales[epp.id_epp] || 0;
+                const tdT = document.createElement("td");
+                tdT.style.padding = "10px";
+                tdT.style.borderBottom = "1px solid #27272a";
+                tdT.style.textAlign = "center";
+                tdT.style.fontWeight = "bold";
+                tdT.style.color = totalE > 0 ? "#10b981" : "#a1a1aa";
+                tdT.textContent = totalE;
+                tr.appendChild(tdT);
+
+                const costo = parseFloat(epp.costo) || 0;
+                const tdCU = document.createElement("td");
+                tdCU.style.padding = "10px";
+                tdCU.style.borderBottom = "1px solid #27272a";
+                tdCU.style.textAlign = "right";
+                tdCU.textContent = `S/ ${costo.toFixed(2)}`;
+                tr.appendChild(tdCU);
+
+                const costoTot = data.costos_totales[epp.id_epp] || 0;
+                const tdCT = document.createElement("td");
+                tdCT.style.padding = "10px";
+                tdCT.style.borderBottom = "1px solid #27272a";
+                tdCT.style.textAlign = "right";
+                tdCT.style.fontWeight = "bold";
+                tdCT.style.color = costoTot > 0 ? "#10b981" : "#a1a1aa";
+                tdCT.textContent = `S/ ${costoTot.toFixed(2)}`;
+                tr.appendChild(tdCT);
+
+                globalReportTableBody.appendChild(tr);
+            });
+
+            globalReportTotal.textContent = `S/ ${data.gasto_total_anual.toFixed(2)}`;
+
+        } catch (error) {
+            console.error("Error al cargar reporte global:", error);
         }
     }
 });

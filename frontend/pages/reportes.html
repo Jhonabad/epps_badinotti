@@ -35,8 +35,16 @@
     </nav>
 
     <main class="main-content">
-        <h1 class="page-title">Reportes y Estadísticas</h1>
-        <p class="page-subtitle">Progreso de entregas de EPPs.</p>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+            <div>
+                <h1 class="page-title" style="margin-bottom: 5px;">Reportes y Estadísticas</h1>
+                <p class="page-subtitle" style="margin-bottom: 0;">Progreso de entregas de EPPs.</p>
+            </div>
+            <button id="btnOpenGlobalModal" class="btn-primary" style="background-color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                <span class="material-symbols-outlined">table_chart</span>
+                PEDIDO GLOBAL EPP BADINOTTI ...
+            </button>
+        </div>
 
         <div class="report-panel">
             <div class="report-type-selector">
@@ -112,8 +120,86 @@
                 </div>
                 <p id="monthlyNoDataMsg" style="text-align: center; color: #a1a1aa; margin-top: 20px; display: none;">No hay entregas registradas mensualmente en esta área.</p>
             </div>
+
+            <div id="colaboradoresListaContainer" style="display: none; margin-top: 40px; background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <h3 style="color: white; margin-bottom: 20px; text-align: center; font-size: 1.2rem;">Colaboradores del Área y EPPs Entregados</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; color: #e4e4e7; text-align: left;">
+                        <thead id="colaboradoresListaHead">
+                            <tr>
+                                <th style="padding: 12px; border-bottom: 2px solid rgba(139, 92, 246, 0.5);">Colaborador</th>
+                                <th style="padding: 12px; border-bottom: 2px solid rgba(139, 92, 246, 0.5); text-align: center;">Total EPPs Entregados</th>
+                            </tr>
+                        </thead>
+                        <tbody id="colaboradoresListaBody">
+                            <!-- Rows dynamically generated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Colaborador Matrix Panel -->
+            <div id="colaboradorMatrixPanel" style="display: none; margin-top: 20px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;">
+                    <div>
+                        <h2 id="matrixColaboradorNombre" style="color: white; font-size: 1.3rem; margin-bottom: 5px;">FLORES CONDOY, ISOE</h2>
+                        <div style="color: #a1a1aa; font-size: 0.9rem; display: flex; gap: 30px;">
+                            <span><strong>ÁREA:</strong> <span id="matrixColaboradorArea">Filamento</span></span>
+                            <span><strong>Puesto de Trabajo:</strong> <span id="matrixColaboradorCargo">Apoyo Filamento</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; background: rgba(139, 92, 246, 0.2); padding: 8px; border-radius: 4px 4px 0 0; border: 1px solid rgba(139, 92, 246, 0.5); border-bottom: none;">
+                    <strong style="color: white;">EPP ASIGNADO AL PERSONAL</strong>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: center; color: #e4e4e7; border: 1px solid rgba(139, 92, 246, 0.5);">
+                        <thead id="matrixColaboradorHead">
+                        </thead>
+                        <tbody id="matrixColaboradorBody">
+                        </tbody>
+                        <tfoot id="matrixColaboradorFoot">
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
+
+    <!-- Global Report Modal -->
+    <div id="globalReportModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; overflow-y: auto; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #18181b; width: 95%; max-width: 1400px; border-radius: 8px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); margin: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px;">
+                <h2 style="color: white; font-size: 1.3rem; line-height: 1.4;">PEDIDO GLOBAL DE EPP BADINOTTI PERÚ, SEGÚN CUADRO DE FRECUENCIA POR MESES <span id="globalYearLabel" style="color:var(--primary)"></span></h2>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <select id="globalYearSelect" style="padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                    </select>
+                    <button id="btnCloseGlobalModal" style="background: none; border: none; color: var(--danger); cursor: pointer; display: flex; align-items: center;">
+                        <span class="material-symbols-outlined" style="font-size: 2rem;">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto; max-height: 55vh;">
+                <table id="globalReportTable" style="width: 100%; border-collapse: collapse; color: #e4e4e7; text-align: left; min-width: 1200px;">
+                    <thead style="position: sticky; top: 0; background: #27272a; z-index: 10;">
+                        <tr id="globalReportTableHead">
+                        </tr>
+                    </thead>
+                    <tbody id="globalReportTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 15px 25px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3); text-align: right;">
+                    <span style="display: block; color: #a1a1aa; font-size: 0.9rem; margin-bottom: 5px;">GASTO TOTAL ANUAL</span>
+                    <strong id="globalReportTotal" style="color: #10b981; font-size: 1.5rem;">S/ 0.00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="../js/reportes.js"></script>
 </body>

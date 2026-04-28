@@ -5,7 +5,7 @@ const { connectToDatabase } = require("../database/db");
 // 🔹 GET - listar epp
 router.get("/", async (req, res) => {
     try {
-        const rows = await connectToDatabase("SELECT id_epp, nombre_epp, tipo, stock FROM epp");
+        const rows = await connectToDatabase("SELECT id_epp, nombre_epp, tipo, stock, vida_util_dias, costo FROM epp");
         res.json(rows);
     } catch (error) {
         console.error("Error al obtener epp:", error);
@@ -16,22 +16,27 @@ router.get("/", async (req, res) => {
 // 🔹 POST - crear epp
 router.post("/", async (req, res) => {
     try {
-        const { nombre_epp, tipo, stock } = req.body;
+        const { nombre_epp, tipo, stock, vida_util_dias, costo } = req.body;
         
         if (!nombre_epp || !tipo || stock === undefined) {
             return res.status(400).json({ error: "Faltan datos obligatorios" });
         }
 
+        const vUtil = vida_util_dias !== undefined && vida_util_dias !== "" ? parseInt(vida_util_dias) : 180;
+        const vCosto = costo !== undefined && costo !== "" ? parseFloat(costo) : 0;
+
         const result = await connectToDatabase(
-            "INSERT INTO epp (nombre_epp, tipo, stock) VALUES (?, ?, ?)",
-            [nombre_epp, tipo, parseInt(stock)]
+            "INSERT INTO epp (nombre_epp, tipo, stock, vida_util_dias, costo) VALUES (?, ?, ?, ?, ?)",
+            [nombre_epp, tipo, parseInt(stock), vUtil, vCosto]
         );
 
         res.json({
             id_epp: result.insertId,
             nombre_epp,
             tipo,
-            stock: parseInt(stock)
+            stock: parseInt(stock),
+            vida_util_dias: vUtil,
+            costo: vCosto
         });
     } catch (error) {
         console.error("Error al crear epp:", error);
@@ -43,15 +48,18 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const { nombre_epp, tipo, stock } = req.body;
+        const { nombre_epp, tipo, stock, vida_util_dias, costo } = req.body;
 
         if (!nombre_epp || !tipo || stock === undefined) {
             return res.status(400).json({ error: "Faltan datos obligatorios" });
         }
 
+        const vUtil = vida_util_dias !== undefined && vida_util_dias !== "" ? parseInt(vida_util_dias) : 180;
+        const vCosto = costo !== undefined && costo !== "" ? parseFloat(costo) : 0;
+
         const result = await connectToDatabase(
-            "UPDATE epp SET nombre_epp = ?, tipo = ?, stock = ? WHERE id_epp = ?",
-            [nombre_epp, tipo, parseInt(stock), id]
+            "UPDATE epp SET nombre_epp = ?, tipo = ?, stock = ?, vida_util_dias = ?, costo = ? WHERE id_epp = ?",
+            [nombre_epp, tipo, parseInt(stock), vUtil, vCosto, id]
         );
 
         if (result.affectedRows === 0) {

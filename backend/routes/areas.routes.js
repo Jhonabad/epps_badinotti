@@ -182,12 +182,16 @@ router.get("/stats/colaborador/:colId", async (req, res) => {
 
         const areas = await getAreasConEPPs();
         const epp = await connectToDatabase("SELECT id_epp, nombre_epp, tipo, stock FROM epp");
-        const entregadasDB = await connectToDatabase("SELECT id_colaborador, id_epp, cantidad FROM entregas WHERE id_colaborador = ?", [colId]);
+        const entregadasDB = await connectToDatabase("SELECT id_entrega, id_colaborador, id_epp, cantidad, fecha, fecha_devolucion, estado_devolucion FROM entregas WHERE id_colaborador = ?", [colId]);
 
         const entregas = entregadasDB.map(ent => ({
+            id_entrega: ent.id_entrega,
             id_colaborador: ent.id_colaborador,
             id_epp: ent.id_epp,
-            cantidad: ent.cantidad
+            cantidad: ent.cantidad,
+            fecha: ent.fecha,
+            fecha_devolucion: ent.fecha_devolucion,
+            estado_devolucion: ent.estado_devolucion
         }));
 
         const area = areas.find(a => a.nombre_area.toLowerCase() === colaborador.area.toLowerCase());
@@ -219,9 +223,31 @@ router.get("/stats/colaborador/:colId", async (req, res) => {
             });
         });
 
+        const eventosMap = {};
+        entregas.forEach(ent => {
+            if (!ent.fecha) return;
+            const fechaStr = new Date(ent.fecha).toISOString().split('T')[0];
+            if (!eventosMap[fechaStr]) eventosMap[fechaStr] = {};
+            
+            eventosMap[fechaStr][ent.id_epp] = {
+                id_entrega: ent.id_entrega,
+                cantidad: ent.cantidad,
+                fecha_devolucion: ent.fecha_devolucion ? new Date(ent.fecha_devolucion).toISOString().split('T')[0] : null,
+                estado_devolucion: ent.estado_devolucion
+            };
+        });
+
+        const eventosLista = Object.keys(eventosMap).sort().map(fecha => ({
+            fecha_evento: fecha,
+            epps: eventosMap[fecha]
+        }));
+
         res.json({
             nombre_colaborador: colaborador.nombre_colaborador,
-            stats
+            cargo: 'Colaborador - ' + colaborador.area,
+            nombre_area: area.nombre_area,
+            stats,
+            eventosLista
         });
     } catch (error) {
         res.status(500).json({ error: "Error al calcular estadisticas del colaborador" });
@@ -284,10 +310,34 @@ router.get("/:id/stats", async (req, res) => {
             });
         });
 
+        const eppsDelAreaInfo = stats.map(s => ({ id_epp: s.id_epp, nombre_epp: s.nombre_epp }));
+
+        const colaboradoresLista = colaboradoresArea.map(col => {
+            const eppDetalles = {};
+            area.epps_asignados.forEach(eppId => {
+                eppDetalles[eppId] = 0;
+            });
+
+            entregas.forEach(entrega => {
+                const entregaEid = parseInt(entrega.id_epp) || entrega.id_epp;
+                if (entrega.id_colaborador === col.id_colaborador) {
+                    if (eppDetalles[entregaEid] !== undefined) {
+                        eppDetalles[entregaEid] += entrega.cantidad;
+                    }
+                }
+            });
+            return {
+                id_colaborador: col.id_colaborador,
+                nombre_colaborador: col.nombre_colaborador,
+                epps: eppDetalles
+            };
+        });
+
         res.json({
             nombre_area: area.nombre_area,
             cantColaboradores,
-            stats
+            stats,
+            colaboradoresLista
         });
     } catch (error) {
         res.status(500).json({ error: "Error al calcular estadisticas del area" });
